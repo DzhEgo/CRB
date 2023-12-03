@@ -1,0 +1,141 @@
+<definitions
+    name="CBRService"
+    targetNamespace="http://www.cbr.ru/DailyInfoWebServ/DailyInfo"
+    xmlns:tns="http://www.cbr.ru/DailyInfoWebServ/DailyInfo"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <!-- Типы (структуры данных) -->
+    <types>
+        <xsd:schema targetNamespace="http://www.cbr.ru/DailyInfoWebServ/DailyInfo">
+            <xsd:element name="GetCursOnDateXML">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="On_date" type="xsd:dateTime"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetCursDynamicXML">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="FromDate" type="xsd:dateTime"/>
+                        <xsd:element name="ToDate" type="xsd:dateTime"/>
+                        <xsd:element name="ValutaCode" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="EnumValutesXML">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Seld" type="xsd:boolean"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ValuteData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="ValuteCode" type="xsd:string"/>
+                        <xsd:element name="Name" type="xsd:string"/>
+                        <xsd:element name="Value" type="xsd:float"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ValuteDynamicData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="Date" type="xsd:string"/>
+                        <xsd:element name="Value" type="xsd:float"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+
+    <!-- Определение сообщений -->
+    <message name="GetCursOnDateXMLRequest">
+        <part name="parameters" element="tns:GetCursOnDateXML"/>
+    </message>
+    <message name="GetCursOnDateXMLResponse">
+        <part name="result" element="tns:ValuteData"/>
+    </message>
+
+    <message name="GetCursDynamicXMLRequest">
+        <part name="parameters" element="tns:GetCursDynamicXML"/>
+    </message>
+    <message name="GetCursDynamicXMLResponse">
+        <part name="result" element="tns:ValuteDynamicData"/>
+    </message>
+
+    <message name="EnumValutesXMLRequest">
+        <part name="parameters" element="tns:EnumValutesXML"/>
+    </message>
+    <message name="EnumValutesXMLResponse">
+        <part name="result" element="tns:ValuteData"/>
+    </message>
+
+    <!-- Определение порта -->
+    <portType name="DailyInfoSoap">
+        <operation name="GetCursOnDateXML">
+            <input message="tns:GetCursOnDateXMLRequest"/>
+            <output message="tns:GetCursOnDateXMLResponse"/>
+        </operation>
+
+        <operation name="GetCursDynamicXML">
+            <input message="tns:GetCursDynamicXMLRequest"/>
+            <output message="tns:GetCursDynamicXMLResponse"/>
+        </operation>
+
+        <operation name="EnumValutesXML">
+            <input message="tns:EnumValutesXMLRequest"/>
+            <output message="tns:EnumValutesXMLResponse"/>
+        </operation>
+    </portType>
+
+    <!-- Определение привязки -->
+    <binding name="DailyInfoSoap" type="tns:DailyInfoSoap">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="GetCursOnDateXML">
+            <soap:operation soapAction="http://www.cbr.ru/DailyInfoWebServ/DailyInfo/GetCursOnDateXML"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="GetCursDynamicXML">
+            <soap:operation soapAction="http://www.cbr.ru/DailyInfoWebServ/DailyInfo/GetCursDynamicXML"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+
+        <operation name="EnumValutesXML">
+            <soap:operation soapAction="http://www.cbr.ru/DailyInfoWebServ/DailyInfo/EnumValutesXML"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <!-- Определение службы -->
+    <service name="DailyInfo">
+        <port name="DailyInfoSoap" binding="tns:DailyInfoSoap">
+            <soap:address location="http://localhost:8000/cbr"/>
+        </port>
+    </service>
+</definitions>
