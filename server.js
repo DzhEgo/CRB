@@ -1,45 +1,97 @@
-const http = require('http')
 const soap = require('soap')
+const http = require('http')
+const wsdlUrl = 'https://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx?WSDL'
 
-const cbrService = {
-    DailyInfo: {
-        DailyInfoSoap: {
-            GetCursOnDateXML: function (args) {
-                console.log('GetCursOnDateXML вызов с параметрами:', args)
-                return {
-                    ValuteData: [
-                        { ValuteCode: 'R01010', Name: 'Австралийский доллар', Value: 16.0102 },
-                        { ValuteCode: 'R01090', Name: 'Белорусский рубль', Value: 18.4290 },
-                    ]
-                }
-            },
-            GetCursDynamicXML: function (args) {
-                console.log('GetCursDynamicXML вызов с параметрами:', args)
-                return {
-                    ValuteDynamicData: [
-                        { Date: '01.03.2023', Value: 50.4031 },
-                        { Date: '02.03.2023', Value: 50.7946 },
-                    ]
-                }
-            },
-            EnumValutesXML: function (args) {
-                console.log('EnumValutesXML вызов с параметрами:', args)
-                return {
-                    ValuteData: [
-                        { ValuteCode: 'R01010', Name: 'Австралийский доллар', Value: 16.0102 },
-                        { ValuteCode: 'R01090', Name: 'Белорусский рубль', Value: 18.4290 },
-                    ]
-                }
+const myService = {
+  MyService: {
+    MyPort: {
+      getValute: (args, callback) => {
+        soap.createClient(wsdlUrl, (err, client) => {
+          if (err) {
+            console.error('Ошибка в создании клиента:', err)
+            return callback(err)
+          }
+
+          console.log('SOAP клиент успешно создан!')
+          const dinamic = []
+
+          client.GetCursDynamicXML(args, (err, result) => {
+            if (err) {
+              console.error('Ошибка запроса:', err)
+              return callback(err)
             }
-        }
-    }
+
+            const output = result.GetCursDynamicXMLResult.ValuteData.ValuteCursDynamic
+            for (let i = 0; i < output.length; i++) {
+              dinamic[i] = {
+                date: output[i].CursDate.slice(0, 10),
+                value: output[i].Vcurs,
+              }
+            }
+
+            console.log(dinamic)
+            callback(null, dinamic)
+          })
+        })
+      },
+      getValutes: (args, callback) => {
+        soap.createClient(wsdlUrl, (err, client) => {
+          if (err) {
+            console.error('Ошибка в создании клиента:', err)
+            return callback(err)
+          }
+
+          console.log('SOAP клиент успешно создан!')
+          const args1 = { On_date: new Date().toISOString().slice(0, 19) }
+          const currencies = []
+
+          client.GetCursOnDateXML({ On_date: args1 }, (err, result) => {
+            if (err) {
+              console.error('Ошибка в функции GetCursOnDateXML:', err.Fault)
+              return callback(err)
+            }
+
+            const cur = result.GetCursOnDateXMLResult.ValuteData.ValuteCursOnDate
+
+            client.EnumValutesXML(args, (err, result) => {
+              if (err) {
+                console.error('Ошибка запроса:', err)
+                return callback(err)
+              }
+
+              const output = result.EnumValutesXMLResult.ValuteData.EnumValutes
+
+              for (let i = 0; i < cur.length; i++) {
+                for (let j = 0; j < output.length; j++) {
+                  if (cur[i].Vname == output[j].Vname) {
+                    currencies[i] = {
+                      code: output[i].Vcode,
+                      name: output[i].Vname,
+                      value: cur[i].Vcurs,
+                    }
+                  }
+                }
+              }
+
+              console.log(currencies);
+              callback(null, currencies);
+            })
+          })
+        })
+      },
+    },
+  },
 }
 
-const wsdl = require('fs').readFileSync('cbr.wsdl', 'utf8')
-const server = http.createServer((request, response) => response.end('Ошибка в создании сервера'))
-server.listen(8000)
 
-soap.listen(server, '/cbr', cbrService, wsdl, () =>
-    console.log('SOAP-сервер запущен...'),
-    console.log('Адрес: http://localhost:8000/cbr?wsdl')
+
+const wsdl = require('fs').readFileSync('./crb.wsdl', 'utf8')
+const server = http.createServer((request, response) =>
+  response.end('404')
+)
+
+server.listen(3000)
+
+soap.listen(server, '/', myService, wsdl, () =>
+  console.log('Сервер запущен на порту 3000...')
 )

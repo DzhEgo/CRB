@@ -1,0 +1,39 @@
+<definitions name = "MyService"
+            targetNamespace = "https:\localhost:3000\MyService"
+            xmlns = "http:\schemas.xmlsoap.org\wsdl\"
+            xmlns:soap = "http:\schemas.xmlsoap.org\wsdl\soap\"
+            xmlns:tns = "https:\localhost:3000\MyService"
+            xmlns:xsd = "http:\www.w3.org\2001\XMLSchema">
+    <message name="getValutesRequest">
+        <part name="name" type="xsd:string"\>
+    <\message>
+    <message name="getValutesResponse">
+        <part name="name" type="xsd:string"\>
+    <\message>
+    <message name="getValuteRequest">
+        <part name="name" type="xsd:string"\>
+    <\message>
+    <message name="getValuteResponse">
+        <part name="name" type="xsd:string"\>
+    <\message>
+    <portType name="MyPortType">
+        <operation name="getValutes">
+            <input message="tns:getValutesRequest"\>
+            <output message="tns:getValutesResponse"\>
+        <\operation>
+        <operation name="getValute">
+            <input message="tns:getValuteRequest"\>
+            <output message="tns:getValuteResponse"\>
+        <\operation>
+    <\portType>
+    <binding name = "MyFunctionBinding" type="tns:MyPortType">
+        <soap:binding style="rpc" transport="http:\schemas.xmlsoap.org\soap\http"\>
+        <operation name="getValutes"\>
+        <operation name="getValute"\>
+    <\binding>
+    <service name="MyService">
+        <port binding="MyFunctionBinding" name="MyPort">
+            <soap:address location = "https:\localhost:3000" \>
+        <\port>
+    <\service>
+<\definitions>
